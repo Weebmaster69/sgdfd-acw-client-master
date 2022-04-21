@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.WindowConstants;
 
 import pe.edu.unmsm.sgdfd.agd.to.DataGeneracionMasivaTO;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -53,8 +56,15 @@ import java.awt.Image;
  * @author antony.almonacid
  */
 public class Presentacion {
-
+    private static Image loadImage(String name) {
+        URL url = Presentacion.class.getClassLoader().getResource(name);
+        Image img = Toolkit.getDefaultToolkit().getImage(url);
+        // possible hack to force pre-loading of (toolkit) image in next line
+        // new ImageIcon(img);
+        return img;
+    }
     public static void main(String[] args) throws IOException {
+        
         if (args.length > 0) {
             final File appdir = new File(args[0]);
             new Thread() {
@@ -76,8 +86,15 @@ public class Presentacion {
             view.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         }
         SystemTray systemTray = SystemTray.getSystemTray();
-        TrayIcon trayIcon = new TrayIcon(Toolkit.getDefaultToolkit()
-        .getImage("C:\\Users\\gonza\\workspace\\sgdfd-acw-client-master\\src\\main\\resources\\images\\myappsmall.png"), "ACW");
+        
+        Image image = loadImage("images/myappsmall.png");
+        // URL url = Presentacion.class.getResource("myappsmall.png");
+        // Image image = Toolkit.getDefaultToolkit().getImage("src\\main\\java\\pe\\edu\\unmsm\\sgdfd\\agd\\app\\myappsmall.png");
+
+
+        // Image image = Toolkit.getDefaultToolkit().getImage(url);
+        TrayIcon trayIcon = new TrayIcon( image, "ACW");
+        trayIcon.setImageAutoSize(true);
         PopupMenu popMenu = new PopupMenu();
         MenuItem show = new MenuItem("Show");
         show.addActionListener(new ActionListener() {

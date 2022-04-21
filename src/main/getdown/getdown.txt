@@ -1,7 +1,7 @@
 # where our app is hosted on the internets
 appbase = https://github.com/Weebmaster69/sgdfd-acw-client-master/releases/download/1.0
 # the jar file that contains our code
-code = sgdfd-agd-1.0-SNAPSHOT-jar-with-dependencies.jar
+code = sgdfd-acw-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 # include the latest copy of getdown; app checks at startup whether it should upgrade getdown
 code = getdown-new.jar
@@ -14,4 +14,3 @@ apparg = %APPDIR%
 
 # test the %env% mechanism
 jvmarg = -Dusername=\%ENV.USER%
-

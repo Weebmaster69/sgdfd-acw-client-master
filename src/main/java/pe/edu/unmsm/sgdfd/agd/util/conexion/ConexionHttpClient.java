@@ -64,9 +64,9 @@ public class ConexionHttpClient {
             // create request
             HttpEntity<?> request = new HttpEntity<Object>(solicitud,headers);
                 
-            DataGeneracionMasivaTO response = restTemplate.postForObject("http://localhost:8081/sgdfd/mcc/backend" + "/documentos/preprocesar/generacion", request, DataGeneracionMasivaTO.class);
+            // DataGeneracionMasivaTO response = restTemplate.postForObject("http://localhost:8081/sgdfd/mcc/backend" + "/documentos/preprocesar/generacion", request, DataGeneracionMasivaTO.class);
             //DataGeneracionMasivaTO response = restTemplate.postForObject("http://desarrollocp.unmsm.edu.pe:8080/sgdfd/mcc/backend" + "/documentos/preprocesar/generacion", request, DataGeneracionMasivaTO.class);
-            //DataGeneracionMasivaTO response = restTemplate.postForObject("https://servicioonline.unmsm.edu.pe/sgdfd/mcc/backend" + "/documentos/preprocesar/generacion", request, DataGeneracionMasivaTO.class);
+            DataGeneracionMasivaTO response = restTemplate.postForObject("https://servicioonline.unmsm.edu.pe/sgdfd/mcc/backend" + "/documentos/preprocesar/generacion", request, DataGeneracionMasivaTO.class);
             
             return response;
         } catch (ResourceAccessException | HttpClientErrorException | HttpServerErrorException e) {
@@ -93,9 +93,9 @@ public class ConexionHttpClient {
             // create request
             HttpEntity<?> request = new HttpEntity<Object>(solicitud,headers);
                 
-            restTemplate.postForObject("http://localhost:8081/sgdfd/mcc/backend" + "/documentos/guardar", request, SolicitudGuardarDocumentoTO.class);
+            //restTemplate.postForObject("http://localhost:8081/sgdfd/mcc/backend" + "/documentos/guardar", request, SolicitudGuardarDocumentoTO.class);
             //restTemplate.postForObject("http://desarrollocp.unmsm.edu.pe:8080/sgdfd/mcc/backend" + "/documentos/guardar", request, SolicitudGuardarDocumentoTO.class);
-            //restTemplate.postForObject("https://servicioonline.unmsm.edu.pe/sgdfd/mcc/backend" + "/documentos/guardar", request, SolicitudGuardarDocumentoTO.class);
+            restTemplate.postForObject("https://servicioonline.unmsm.edu.pe/sgdfd/mcc/backend" + "/documentos/guardar", request, SolicitudGuardarDocumentoTO.class);
             
         } catch (ResourceAccessException | HttpClientErrorException | HttpServerErrorException e) {
             LOG.fatal(MENSAJE_LOG, e);

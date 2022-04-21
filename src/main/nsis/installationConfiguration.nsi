@@ -69,10 +69,42 @@
 ;--------------------------------
 ;Languages
  
-  !insertmacro MUI_LANGUAGE "English"
+  !insertmacro MUI_LANGUAGE "Spanish"
 
 ;--------------------------------
+RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
+
 ;Installer Sections
+Section ""  
+    call detectJava
+SectionEnd 
+Function detectJava
+  
+  StrCpy $1 "SOFTWARE\JavaSoft\Java Runtime Environment"  
+  StrCpy $2 0  
+  ReadRegStr $2 HKLM "$1" "CurrentVersion"  
+  StrCmp $2 "" DetectTry2   
+  ReadRegStr $5 HKLM "$1\$2" "JavaHome"  
+  StrCmp $5 "" DetectTry2  
+  goto done  
+  
+  DetectTry2:  
+  ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Development Kit" "CurrentVersion"  
+  StrCmp $2 "" NoJava  
+  ReadRegStr $5 HKLM "SOFTWARE\JavaSoft\Java Development Kit\$2" "JavaHome"  
+  StrCmp $5 "" NoJava done  
+  
+  done:  
+  ;All done.   
+  MessageBox MB_OK "$2 JRE installed"
+  NoJava:  
+  ;Write the script to install Java here 
+  SetOutPath $PLUGINSDIR
+  File  "..\..\..\contrib\jdk-11.0.13_windows-x64_bin.exe"
+  DetailPrint "Starting the JRE installation"
+  ExecWait '"$PLUGINSDIR\jdk-11.0.13_windows-x64_bin.exe"'
+   
+FunctionEnd
 
 Section "${PROJECT_NAME}" MyApp
 
