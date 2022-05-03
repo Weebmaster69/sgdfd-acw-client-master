@@ -82,13 +82,11 @@ public class GeneradorDocumento {
                 websocket.send("Generando documento " + (i+1) + " de "+ total);
                 
                 DataParticipanteTO generadorDocxRequest = data.getRegistros().get(i);
-                websocket.send("plantilla");
                 //Generar plantilla word solo con imágenes
                 isDocx = new ByteArrayInputStream(data.getArchivoPlantilla());
                 
                 //Agregar QR a la lista de imágenes comunes
 	    	data.getLsImagenes().add(generadorDocxRequest.getCodigoQR());
-            websocket.send("qr");
 
 		//Agregar duplicado de QR adicional a la lista de imágenes comunes
                 if(generadorDocxRequest.getPropiedad().isRenderizar()) {     
@@ -105,34 +103,27 @@ public class GeneradorDocumento {
                 osDocx = InsertarImagen.insertarImagen(isDocx,data.getLsImagenes());
 
 		data.getLsImagenes().remove(data.getLsImagenes().size()-1);	
-        websocket.send("remover qr");
 		
 		//Remover QR duplicado de lista de imágenes comunes
                 if(generadorDocxRequest.getPropiedad().isRenderizar()) {data.getLsImagenes().remove(data.getLsImagenes().size()-1);}
-        websocket.send("guardar plantilla");
                 
 		//Guardar plantilla word temporalmente
 		docInStream = new ByteArrayInputStream(osDocx.toByteArray());
 		Document outDoc = new Document(docInStream);
 		outDoc.save("C:\\MCC_TMP\\prueba.docx");
 		
-        websocket.send("leer plantilla");
         
 		//Leer plantilla word
 		Document inDoc = new Document("C:\\MCC_TMP\\prueba.docx");
 		docOutStream = new ByteArrayOutputStream();
 		inDoc.save(docOutStream, SaveFormat.DOCX);
 		
-        websocket.send("generar plantilla");
 		//Generar plantilla word con parametros dinámicos
 		docxTemplater = new DocxTemplater(new ByteArrayInputStream(docOutStream.toByteArray()),data.getIdPlantilla().toString());
-        websocket.send("generar plantilla 2");
 		isDocx = docxTemplater.processAndReturnInputStream(generadorDocxRequest.getParametros());//isDocx2
 		
-        websocket.send("remover marca");
 		//Remover marca de agua de documento generado
 		docxByteArray = InsertarImagen.removeMarca(IOUtils.toByteArray(isDocx)).toByteArray();//isDocx2
-        websocket.send("convertir pdf");	
 		convertDocxToPdf = new ConvertDocxToPdf();
 	
 	    	if (data.getGenerarPdf()) {
@@ -140,7 +131,6 @@ public class GeneradorDocumento {
                     pdfByteArray = convertDocxToPdf.convertDocxToPdf(docxByteArray);
                     convertDocxToPdf.finalizar();
 	    	}
-        websocket.send("docuymento add");
 	    			
 		documentos.add(DocumentoTO.builder()
 						.generarDocx(data.getGenerarDocx())

@@ -64,7 +64,9 @@ public class Presentacion {
         return img;
     }
     public static void main(String[] args) throws IOException {
-        
+        String path = System.getProperty("user.dir");
+        System.out.println(path + "/jacob-1.18-x64.dll");
+        System.setProperty("jacob.dll.path", path + "/jacob-1.18-x64.dll" );
         if (args.length > 0) {
             final File appdir = new File(args[0]);
             new Thread() {

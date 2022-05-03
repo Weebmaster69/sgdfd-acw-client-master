@@ -5,7 +5,7 @@
 
   !include "MUI2.nsh"
   !include ..\..\..\target\project.nsh
-
+  !include x64.nsh
 ;--------------------------------
 ;General
 
@@ -75,50 +75,51 @@
 RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
 
 ;Installer Sections
-Section ""  
-    call detectJava
-SectionEnd 
-Function detectJava
-  
-  StrCpy $1 "SOFTWARE\JavaSoft\Java Runtime Environment"  
-  StrCpy $2 0  
-  ReadRegStr $2 HKLM "$1" "CurrentVersion"  
-  StrCmp $2 "" DetectTry2   
-  ReadRegStr $5 HKLM "$1\$2" "JavaHome"  
-  StrCmp $5 "" DetectTry2  
-  goto done  
-  
-  DetectTry2:  
-  ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Development Kit" "CurrentVersion"  
-  StrCmp $2 "" NoJava  
-  ReadRegStr $5 HKLM "SOFTWARE\JavaSoft\Java Development Kit\$2" "JavaHome"  
-  StrCmp $5 "" NoJava done  
-  
-  done:  
-  ;All done.   
-  MessageBox MB_OK "$2 JRE installed"
-  NoJava:  
-  ;Write the script to install Java here 
-  SetOutPath $PLUGINSDIR
-  File  "..\..\..\contrib\jdk-11.0.13_windows-x64_bin.exe"
-  DetailPrint "Starting the JRE installation"
-  ExecWait '"$PLUGINSDIR\jdk-11.0.13_windows-x64_bin.exe"'
-   
-FunctionEnd
+Var JavaInstallationPath
+Section "" FINDJAVA    
+
+    DetectTry2:
+    SetRegView 64
+    ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\JDK" "CurrentVersion"
+    StrCmp $2 "" NoJava JDK 
+    SetRegView LastUsed
+    
+    JDK:
+    ReadRegStr $5 HKLM "SOFTWARE\JavaSoft\JDK\$2" "JavaHome"  
+    StrCmp $5 "" NoJava GetValue
+
+    GetValue:
+    StrCpy $JavaInstallationPath $5
+    Messagebox MB_OK "Java ya instalado: $JavaInstallationPath"
+    Goto done
+
+    NoJava:
+    SetOutPath $PLUGINSDIR
+    File  "..\..\..\contrib\jdk-11.0.13_windows-x64_bin.exe"
+    Messagebox MB_OK "Java no detectado. Instalando java"  
+    # Install Java
+    ExecWait '"$PLUGINSDIR\jdk-11.0.13_windows-x64_bin.exe"'
+
+    done:   
+    #$JavaInstallationPath should contain the system path to Java
+SectionEnd
 
 Section "${PROJECT_NAME}" MyApp
 
   SetOutPath "$INSTDIR"
   
   ;ADD YOUR OWN FILES HERE...
+  
   File /r ..\..\..\target\getdown-stub\*.*
   File myapp.ico
   File myappbanner.bmp
   File Readme.txt
+  File /r ..\..\..\dll\*.*
   
   ;Store installation folder
   WriteRegStr HKCU "Software\${PROJECT_NAME}" "" $INSTDIR
-  
+  ; se incia junto al sistema
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "sgdfd-acw" "$INSTDIR\getdown.jar"
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
