@@ -7,8 +7,6 @@ package pe.edu.unmsm.sgdfd.agd.app;
 
 import com.google.gson.Gson;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -31,12 +29,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.net.BindException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.URL;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import pe.edu.unmsm.sgdfd.agd.Servidor;
 import pe.edu.unmsm.sgdfd.agd.util.server.ServidorHttp;
 import com.threerings.getdown.util.LaunchUtil;
@@ -55,18 +61,54 @@ import java.awt.Image;
  *
  * @author antony.almonacid
  */
+class JustOneLock {
+    private String appName;
+  
+    FileLock lock;
+  
+    FileChannel channel;
+  
+    public JustOneLock(String appName) {
+      this.appName = appName;
+    }
+  
+    public boolean isAppActive() throws Exception{
+      File file = new File(System.getProperty("user.home"), appName + ".tmp");
+      channel = new RandomAccessFile(file, "rw").getChannel();
+  
+      lock = channel.tryLock();
+      if (lock == null) {
+        lock.release();
+        channel.close();
+        return true;
+      }
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+        public void run() {
+          try {
+            lock.release();
+            channel.close();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      });
+      return false;
+    }
+  }
 public class Presentacion {
+    
+    static Logger log = LogManager.getLogger(Presentacion.class.getName());
     private static Image loadImage(String name) {
         URL url = Presentacion.class.getClassLoader().getResource(name);
-        Image img = Toolkit.getDefaultToolkit().getImage(url);
-        // possible hack to force pre-loading of (toolkit) image in next line
-        // new ImageIcon(img);
-        return img;
+        return Toolkit.getDefaultToolkit().getImage(url);
     }
-    public static void main(String[] args) throws IOException {
-        String path = System.getProperty("user.dir");
-        System.out.println(path + "/jacob-1.18-x64.dll");
-        System.setProperty("jacob.dll.path", path + "/jacob-1.18-x64.dll" );
+    public static void main(String[] args) throws Exception{
+        JustOneLock ua = new JustOneLock("JustOneId");
+        if (ua.isAppActive()) {
+        System.out.println("Already active.");
+        System.exit(1);
+        } else {
+        System.out.println("NOT already active.");
         if (args.length > 0) {
             final File appdir = new File(args[0]);
             new Thread() {
@@ -78,8 +120,17 @@ public class Presentacion {
                 }
             }.start();
         }
+        }
+        
+        
+        String path = System.getProperty("user.dir");
+        System.out.println(path + "/jacob-1.18-x64.dll");
+        System.setProperty("jacob.dll.path", path + "/jacob-1.18-x64.dll" );
+        
+        
+
         GeneradorGUIView view = new GeneradorGUIView();
-        view.setVisible(true);
+        view.setVisible(false);
         new Servidor(5050).start();
 
 
