@@ -5,30 +5,24 @@
  */
 package pe.edu.unmsm.sgdfd.agd.util.server;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.Executors;
-import org.apache.commons.lang3.StringEscapeUtils;
 /**
  *
  * @author antony.almonacid
  */
 public class ServidorHttp {
-    
+    static Logger log = LogManager.getLogger(ServidorHttp.class.getName());
+
     public void arrancar() throws IOException{
-        
-        //InetSocketAddress addr = new InetSocketAddress("localhost",8080);
-        //InetSocketAddress addr = new InetSocketAddress("172.16.242.19",8080);
         
         InetAddress ip;
         try {
@@ -39,7 +33,7 @@ public class ServidorHttp {
             server.createContext("/test", new Handler());
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();
-            System.out.println("Server is listening on port: " + "8080" + " and ip: "+ ip.getHostAddress());
+            log.info("Server is listening on port: 8080 and ip: "+ ip.getHostAddress());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

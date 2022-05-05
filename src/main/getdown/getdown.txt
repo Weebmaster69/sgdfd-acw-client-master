@@ -19,10 +19,12 @@ jvmarg = -Dappdir=%APPDIR%
 # diseño
 ui.name = Actualizador ACW
 ui.background_image=unmsmActualizador.png
+
 #texto barra de progreso
 ui.status = 55, 225, 400, 68
 ui.status_text = ffffff
 ui.text_shadow = 330000
+
 #barra progreso
 ui.progress = 15, 300, 575, 22
 ui.progress_bar = add8e6

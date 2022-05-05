@@ -5,6 +5,8 @@
  */
 package pe.edu.unmsm.sgdfd.agd.view;
 
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author usuario
@@ -16,6 +18,7 @@ public class GeneradorGUIView extends javax.swing.JFrame {
      */
     public GeneradorGUIView() {
         initComponents();
+        setIconImage (new ImageIcon(getClass().getResource("/images/myapp.png")).getImage());
     }
 
     /**

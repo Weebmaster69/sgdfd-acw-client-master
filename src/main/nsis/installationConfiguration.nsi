@@ -34,7 +34,6 @@
 
   !define MUI_ABORTWARNING
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "myappbanner.bmp"
 
 ;--------------------------------
 ;Pages
