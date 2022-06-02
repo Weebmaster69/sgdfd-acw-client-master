@@ -1,9 +1,0 @@
-# The URL from which the client is downloaded
-appbase = https://github.com/Weebmaster69/sgdfd-acw-client-master/releases/download/1.0
-
-# UI Configuration
-ui.icon = myapp.png
-
-# Resources
-resource = myapp.png
-
