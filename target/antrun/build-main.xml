@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project name="maven-antrun-" default="main"  >
-<target name="main">
-  <taskdef classname="com.threerings.getdown.tools.DigesterTask" classpath="maven.plugin.classpath" name="digest"/>
-  <digest appdir="C:\Users\gonza\workspace\sgdfd-acw-client-master\target/acw"/>
-</target>
-</project>

@@ -1,4 +1,0 @@
-getdown.txt = f0919428444c0d617fc68a09d432ea66
-sgdfd-agd-1.0-SNAPSHOT-jar-with-dependencies.jar = bb12174e76382661c3615ae2aaa7e6ec
-getdown-new.jar = 0361bd0cc7b02c6cc01848bb72cec023
-digest.txt = e032907578bc60eec6f46089fc63e359
