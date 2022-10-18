@@ -7,6 +7,7 @@ package pe.edu.unmsm.sgdfd.agd.util.generacion;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ public class GeneradorDocumento {
             
         InputStream docInStream = null;
         ByteArrayOutputStream docOutStream = null;
+        List<ImagenTO> lsImagenesLocal = new ArrayList<>();
+        lsImagenesLocal = data.getLsImagenes();
         int total = 0;
         
         try {
@@ -49,6 +52,11 @@ public class GeneradorDocumento {
             FileUtil.crearDirectorio(RUTA_ORIGEN);
             for(int i=0; i<data.getRegistros().size();i++) {
                 
+                try { //borrando archivos temporales de generaciones anteriores
+                    FileUtil.eliminarDirectorio(new File(System.getProperty("java.io.tmpdir") + "scriptlet4docx"));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
                 websocket.send("Generando documento " + (i+1) + " de "+ total);
                 
                 DataParticipanteTO generadorDocxRequest = data.getRegistros().get(i);
@@ -56,11 +64,11 @@ public class GeneradorDocumento {
                 isDocx = new ByteArrayInputStream(data.getArchivoPlantilla());
                 
                 //Agregar QR a la lista de imágenes comunes
-	    	    data.getLsImagenes().add(generadorDocxRequest.getCodigoQR());
+	    	    lsImagenesLocal.add(generadorDocxRequest.getCodigoQR());
 
 		        //Agregar duplicado de QR adicional a la lista de imágenes comunes
                 if(generadorDocxRequest.getPropiedad().isRenderizar()) {     
-                    data.getLsImagenes().add(ImagenTO.builder()
+                    lsImagenesLocal.add(ImagenTO.builder()
                                         .imagen(generadorDocxRequest.getCodigoQR().getImagen())
                                         .alto(generadorDocxRequest.getPropiedad().getAlto())
                                         .ancho(generadorDocxRequest.getPropiedad().getAncho())
@@ -70,13 +78,13 @@ public class GeneradorDocumento {
                                         .build());
             }		
 
-            osDocx = InsertarImagen.insertarImagen(isDocx,data.getLsImagenes());
+            osDocx = InsertarImagen.insertarImagen(isDocx,lsImagenesLocal);
 
-            data.getLsImagenes().remove(data.getLsImagenes().size()-1);	
+            lsImagenesLocal.remove(lsImagenesLocal.size()-1);	
 		
 		    //Remover QR duplicado de lista de imágenes comunes
             if(generadorDocxRequest.getPropiedad().isRenderizar()) {
-                data.getLsImagenes().remove(data.getLsImagenes().size()-1);
+                lsImagenesLocal.remove(lsImagenesLocal.size()-1);
             }
                 
             //Guardar plantilla word temporalmente
