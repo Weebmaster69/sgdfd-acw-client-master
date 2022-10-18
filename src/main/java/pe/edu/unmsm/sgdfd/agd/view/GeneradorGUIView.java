@@ -36,7 +36,7 @@ public class GeneradorGUIView extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         operacion.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
-        operacion.setText("Asistente de Conexión Websocket v1.2");
+        operacion.setText("Asistente de Conexión Websocket v2.0");
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logoSm.png"))); // NOI18N
 
