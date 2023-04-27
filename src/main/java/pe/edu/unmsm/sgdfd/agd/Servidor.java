@@ -7,14 +7,21 @@ package pe.edu.unmsm.sgdfd.agd;
 
 import com.google.gson.Gson;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.Set;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
+import javax.enterprise.context.ApplicationScoped;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import pe.edu.unmsm.sgdfd.agd.to.DataGeneracionMasivaTO;
+import pe.edu.unmsm.sgdfd.agd.to.DocumentoDummyTO;
 import pe.edu.unmsm.sgdfd.agd.to.DocumentoTO;
 import pe.edu.unmsm.sgdfd.agd.to.SolicitudGuardarDocumentoTO;
 import pe.edu.unmsm.sgdfd.agd.to.SolicitudMasivaDocumentoTO;
@@ -28,17 +35,17 @@ import pe.edu.unmsm.sgdfd.agd.util.generacion.GeneradorDocumento;
 //@ApplicationScoped
 //@ServerEndpoint("/progress")
 public class Servidor extends WebSocketServer{
-    static Logger log = LogManager.getLogger(Servidor.class.getName());
 
     public Servidor(int puerto){
         super(new InetSocketAddress(puerto));
-        log.info("Recibiendo peticiones en el puerto " + puerto);
+        System.out.println("Recibiendo peticiones en el puerto " + puerto);
     }
     
     @Override
     public void onOpen(WebSocket websocket, ClientHandshake arg1) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         websocket.send("Conexión establecida con éxito.");
-        log.info("Se ha iniciado una nueva conexion");
+        System.out.println("Se ha iniciado una nueva conexion");
     }
 
     @Override
@@ -49,15 +56,29 @@ public class Servidor extends WebSocketServer{
     @Override
     public void onMessage(WebSocket websocket, String mensaje) {
         
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         //Conversión de String to SolicitudMasivaDocumentoTO
         Gson g = new Gson();
         SolicitudMasivaDocumentoTO solicitud = g.fromJson(mensaje, SolicitudMasivaDocumentoTO.class);
-
+        
         //Invoca orquestador de servicios web - protocolo http
         ConexionHttpClient conexion = new ConexionHttpClient();
+        DataGeneracionMasivaTO data = new DataGeneracionMasivaTO();
         websocket.send("Recopilando datos para la generación.....");
-        //Recopilar data necesaria para la generación de documentos
-        DataGeneracionMasivaTO data = conexion.recopilarData(SolicitudMasivaDocumentoTO.builder()
+        
+        if(solicitud.getIdPlantilla() != null){
+            //Recopilar data necesaria para la generación de documento dummy
+            data = conexion.recopilarDataDummy(SolicitudMasivaDocumentoTO.builder()
+                .generarDocx(false)
+                .generarPdf(true)
+                .idPlantilla(solicitud.getIdPlantilla())
+                .idLocal(solicitud.getIdLocal())
+                .usuario(solicitud.getUsuario())
+                .token(solicitud.getToken())
+                .build(), websocket);
+        }else{
+            //Recopilar data necesaria para la generación de documentos
+            data = conexion.recopilarData(SolicitudMasivaDocumentoTO.builder()
                 .generarDocx(false)
                 .generarPdf(true)
                 .idEventoEjecucion(solicitud.getIdEventoEjecucion())
@@ -66,29 +87,48 @@ public class Servidor extends WebSocketServer{
                 .usuario(solicitud.getUsuario())
                 .token(solicitud.getToken())
                 .build(), websocket);
-        
+        }
+       
         websocket.send("Iniciando generación de documentos.....");
         //Proceso de generación de documentos
         GeneradorDocumento generador = new GeneradorDocumento();
         try {
             List<DocumentoTO> documentos = generador.generacionMasivaDocumentos(data,websocket);
-            websocket.send("Subiendo documentos.....");
-            conexion.guardarDocumentos(SolicitudGuardarDocumentoTO.builder()
-                    .documentos(documentos)
-                    .modo("OPERACION_MGD")
-                    .usuario(solicitud.getUsuario())
-                    .token(solicitud.getToken())
-                    .build(), websocket);
-            websocket.send("Proceso finalizado con éxito.");
+            if(solicitud.getIdPlantilla() != null){
+                websocket.send("Subiendo documento dummy.....");
+                DocumentoDummyTO docDummy = conexion.guardarDocumentosDummy(DocumentoDummyTO.builder()
+                                            .idDocumento(null)
+                                            .archivo(documentos.get(0).getArchivoPdf())
+                                            .idPlantilla(solicitud.getIdPlantilla())
+                                            .idLocal(solicitud.getIdLocal())
+                                            .usuario(solicitud.getUsuario())
+                                            .token(solicitud.getToken())
+                                            .build(), websocket);
+                websocket.send("Documento Nº "+docDummy.getIdDocumento()+" listo para su previsualizacion.");
+                
+            }else{
+                websocket.send("Subiendo documentos.....");
+                conexion.guardarDocumentos(SolicitudGuardarDocumentoTO.builder()
+                     .documentos(documentos)
+                     .modo("OPERACION_MGD")
+                     .usuario(solicitud.getUsuario())
+                     .token(solicitud.getToken())
+                     .build(), websocket);
+                websocket.send("Proceso finalizado con éxito.");
+            }
+            
+            
         } catch (Exception ex) {
-            websocket.send("Error: "+ ex.getMessage());
-            log.info(ex.getMessage());
-        }
-        
+             websocket.send("Error: "+ ex.getMessage());
+             System.out.println(ex.getMessage());     
+        }        
     }
 
     @Override
     public void onError(WebSocket arg0, Exception arg1) {
-        log.info(arg1.getMessage());
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println(arg1.getMessage());
     }
+
+    
 }

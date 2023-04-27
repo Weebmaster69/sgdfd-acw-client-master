@@ -6,7 +6,6 @@
 package pe.edu.unmsm.sgdfd.agd.to;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,23 +13,23 @@ import lombok.NoArgsConstructor;
 
 /**
  *
- * @author antony.almonacid
+ * @author usuario
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SolicitudMasivaDocumentoTO {
+public class DocumentoDummyTO {
     
-    private Integer   idEventoEjecucion;
-    private Integer   idTipoParticipante;
-    private Integer[] participantes;
-    private boolean   generarDocx;
-    private boolean   generarPdf;
-    private String    usuario;
-    private String token;
-    private Integer  idPlantilla;
+    private Integer idDocumento;
     private String idLocal;
-   
+    private String nombreLocal;
+    private Integer idPlantilla;
+    private String nombrePlantilla;
+    private byte[] archivo;
+    private Boolean tieneArchivo;
+    private String usuario;
+    private String token;
+    
 }
